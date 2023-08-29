@@ -1,0 +1,47 @@
+{
+  "_meta": {
+    "sources": [
+      "loopback/common/models",
+      "loopback/server/models",
+      "../common/models",
+      "./models"
+    ],
+    "mixins": [
+      "loopback/common/mixins",
+      "loopback/server/mixins",
+      "../common/mixins",
+      "./mixins"
+    ]
+  },
+  "Role": {
+    "dataSource": "mongoDs",
+    "public": true
+  },
+  "RoleMapping": {
+    "dataSource": "mongoDs",
+    "public": true,
+    "options": {
+      "strictObjectIDCoercion": true
+    }
+  },
+  "Order": {
+    "dataSource": "mongoDs",
+    "public": true
+  },
+  "Customer": {
+    "dataSource": "mongoDs",
+    "public": true
+  },
+  "Chef": {
+    "dataSource": "mongoDs",
+    "public": true
+  },
+  "ACL": {
+    "dataSource": "mongoDs",
+    "public": false
+  },
+  "AccessToken": {
+    "dataSource": "mongoDs",
+    "public": false
+  }
+}

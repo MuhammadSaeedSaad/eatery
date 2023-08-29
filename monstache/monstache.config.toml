@@ -1,0 +1,6 @@
+mongo-url = "mongodb://root:password123@mongodb-primary:27017,mongodb-secondary:27017,mongodb-arbiter:27017/services?replicaSet=replicaset&authSource=admin"
+
+elasticsearch-urls = ["http://elasticsearch:9200"]
+
+elasticsearch-user = "elastic"
+elasticsearch-password = "jkgdfjkhaskldjskladfjhdjk"

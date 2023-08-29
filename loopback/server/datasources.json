@@ -1,0 +1,17 @@
+{
+  "mongoDs": {
+    "host": "",
+    "port": 0,
+    "url": "${MONGO_URL}",
+    "database": "",
+    "password": "",
+    "name": "mongoDs",
+    "user": "",
+    "useNewUrlParser": true,
+    "connector": "mongodb"
+  },
+  "db": {
+    "name": "db",
+    "connector": "memory"
+  }
+}

@@ -1,0 +1,184 @@
+version: '3'
+
+services:
+  # mongo1:
+  #   container_name: m1
+  #   image: mongo
+  #   command: mongod --replSet my-mongo-set
+  #   ports:
+  #     - 3001:27017
+  #   networks:
+  #     - eatery-network
+
+  # mongo2:
+  #   container_name: m2
+  #   image: mongo
+  #   command: mongod --replSet my-mongo-set
+  #   ports:
+  #     - 3002:27017
+  #   networks:
+  #     - eatery-network
+  
+  # mongo3:
+  #   container_name: m3
+  #   image: mongo
+  #   command: mongod --replSet my-mongo-set
+  #   ports:
+  #     - 3003:27017
+  #   networks:
+  #     - eatery-network
+
+
+
+  mongodb-primary:
+    image: 'bitnami/mongodb:latest'
+    container_name: mprimary
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb-primary
+      - MONGODB_REPLICA_SET_MODE=primary
+      - MONGODB_ROOT_PASSWORD=password123
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+    volumes:
+      - 'mongodb_master_data:/bitnami'
+    networks:
+      - eatery-network
+
+  mongodb-secondary:
+    image: 'bitnami/mongodb:latest'
+    container_name: msecondary
+    depends_on:
+      - mongodb-primary
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb-secondary
+      - MONGODB_REPLICA_SET_MODE=secondary
+      - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
+      - MONGODB_INITIAL_PRIMARY_PORT_NUMBER=27017
+      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=password123
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+    networks:
+      - eatery-network
+
+  mongodb-arbiter:
+    image: 'bitnami/mongodb:latest'
+    container_name: marbiter
+    depends_on:
+      - mongodb-primary
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb-arbiter
+      - MONGODB_REPLICA_SET_MODE=arbiter
+      - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
+      - MONGODB_INITIAL_PRIMARY_PORT_NUMBER=27017
+      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=password123
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+    networks:
+      - eatery-network
+
+  loopback-app:
+    container_name: loopback
+    build: ./eatery
+    environment:
+      - MONGO_URL=mongodb://root:password123@mongodb-primary:27017,mongodb-secondary:27017,mongodb-arbiter:27017/services?replicaSet=replicaset&authSource=admin
+    ports:
+      - 3000:3000
+    networks:
+      - eatery-network
+    volumes:
+      - ./eatery:/app
+      - /app/node_modules   # to disable deleting the node_modules from the container if I deleted them in the localhost
+    depends_on:
+      - mongodb-primary
+      - mongodb-secondary
+      - mongodb-arbiter
+
+
+  # monstache:
+  #   image: rwynn/monstache:6.7.2
+  #   container_name: monstache1
+  #   working_dir: /app
+  #   command: -f ./monstache.config.toml
+  #   volumes:
+  #     - ./monstache/monstache.config.toml:/app/monstache.config.toml
+  #   ports:
+  #     - 8080:8080
+  #   networks:
+  #     - eatery-network
+  #   restart: unless-stopped
+
+  elasticsearch:
+    image: elasticsearch:7.17.12
+    container_name: elastic3
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+      - ELASTIC_USERNAME=elastic
+      - ELASTIC_PASSWORD=jkgdfjkhaskldjskladfjhdjk    
+    expose:
+      - 9200
+    ports:
+      - "9200:9200"
+    volumes:
+      - ./esdata:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD", "curl", "http://elastic:IwWE9VnKw1pu2pedh8xKwMnQ@localhost:9200"]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      # start_period: 120s
+    networks:
+      - eatery-network
+  
+  # elastic:
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
+  #   container_name: elastic1
+  #   environment:
+  #     - bootstrap.memory_lock=true
+  #     - "ES_JAVA_OPTS=-Xms5g -Xmx5g"
+  #     - discovery.type=single-node
+  #     - xpack.security.enabled=true
+  #     - ELASTIC_USERNAME=elastic
+  #     - ELASTIC_PASSWORD=jkgdfjkhaskldjskladfjhdjk
+  #   restart: always
+  #   ports:
+  #     - '9200:9200'
+  #   networks:
+  #     - eatery-network
+
+  # elasticsearch:
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
+  #   container_name: elastic2
+  #   environment:
+  #     - bootstrap.memory_lock=true
+  #     - "ES_JAVA_OPTS=-Xms5g -Xmx5g"
+  #     - discovery.type=single-node
+  #     - xpack.security.enabled=true
+  #     - ELASTIC_USERNAME=elastic
+  #     - ELASTIC_PASSWORD=jkgdfjkhaskldjskladfjhdjk
+  #   ports:
+  #     - "9200:9200"
+  #   volumes:
+  #     - ./esdata:/usr/share/elasticsearch/data
+  #   networks:
+  #     - eatery-network
+
+
+  # kibana:
+  #   image: kibana:7.17.12
+  #   environment:
+  #     # SERVER_NAME: kibana.example.org
+  #     ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+  #     ELASTICSEARCH_USERNAME: elastic
+  #     ELASTICSEARCH_PASSWORD: jkgdfjkhaskldjskladfjhdjk
+  #     ELASTICSEARCH_SSL_VERIFY: "false"
+  #   networks:
+  #     - eatery-network
+  #   ports:
+  #     - 5601:5601
+  #   depends_on:
+  #     - elasticsearch
+
+volumes:
+  mongodb_master_data:
+    driver: local
+    
+networks:
+  eatery-network:

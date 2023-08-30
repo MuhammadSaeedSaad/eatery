@@ -69,11 +69,11 @@ _____
 
 ## Important notes
 1. make all connection strings as `env variables` in docker-compose
-2. don't create a connection object in rabbitmq every time a notification get sent
+2. don't create a connection object in rabbitmq every time a notification get sent **DONE**
 3. **need confirmation** make the auth tokens customer to put whatever property you want in it
 4. search why it returns 401
-5. add the read for chef
+5. add the read for chef **DONE**
 6. send the data of notification as if you would using an email
 7. search how to customize monstache replication process
 8. seperate the notificaiton logic
-9. try to stop rabbitmq and check if other services will be functioning
+9. try to stop rabbitmq and check if other services will be functioning .. try searching for conn.onclose()

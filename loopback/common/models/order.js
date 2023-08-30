@@ -3,15 +3,6 @@
 const amqplib = require("amqplib");
 const { channel2 } = require("../../server/scripts/rabbitmq_publisher");
 
-let ch1;
-
-(async () => {
-  ch1 = await channel2();
-  console.log("ch1 : " + ch1);
-})();
-
-console.log("ch1 : order.js -- " + ch1);
-
 module.exports = function (Order) {
   Order.beforeRemote("create", function (context, order, next) {
     context.args.data.customerId = context.req.accessToken.userId;
@@ -20,19 +11,28 @@ module.exports = function (Order) {
 
   Order.afterRemote(
     "prototype.patchAttributes",
-    async function (context, order, next) {
-      console.log("ch1 : order.js -- inside afterRemote -- " + ch1);
-      ch1.sendToQueue(
-        "notifications",
-        Buffer.from("order " + order.name + " " + order.status)
-      );
-      console.log(
-        "Rabbitmq Publisher: Message " +
-          "order " +
-          order.name +
-          order.status +
-          " sent"
-      );
+    function (context, order, next) {
+      channel2()
+        .then((channel) => {
+          channel.sendToQueue(
+            "notifications",
+            Buffer.from(
+              "your order " +
+                order.name +
+                "'s status changed to " +
+                order.status
+            )
+          );
+          console.log(
+            "Rabbitmq Publisher: Message " +
+              "order " +
+              order.name +
+              " " +
+              order.status +
+              " sent"
+          );
+        })
+        .catch((e) => console.log(e));
 
       next();
     }

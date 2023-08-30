@@ -46,7 +46,7 @@ services:
 
   loopback-app:
     container_name: loopback
-    build: ./eatery_test
+    build: ./loopback
     environment:
       - MONGO_URL=mongodb://root:password123@mongodb-primary:27017,mongodb-secondary:27017,mongodb-arbiter:27017/services?replicaSet=replicaset&authSource=admin
     ports:
@@ -54,7 +54,7 @@ services:
     networks:
       - eatery-network
     volumes:
-      - ./eatery_test:/app
+      - ./loopback:/app
       - /app/node_modules   # to disable deleting the node_modules from the container if I deleted them in the localhost
     depends_on:
       - mongodb-primary
